@@ -7,6 +7,7 @@ const app = require("./app");
 let s_list = require("./fakeDb");
 
 let newItem = { name: "Dell xps", price: 800 };
+
 beforeAll(() => {
     s_list.length = 0;
 })
@@ -26,7 +27,7 @@ describe("GET /list", function () {
         const resp = await request(app).get(`/list`);
         expect(resp.statusCode).toBe(200);
 
-        expect(resp.body).toEqual({ s_list });
+        expect(resp.body).toEqual({ shoppingList: [{ name: "Dell xps", price: 800 }] });
     });
 });
 // end
@@ -35,16 +36,16 @@ describe("GET /list", function () {
 
 describe("GET /list/:name", function () {
     test("Gets a single item", async function () {
-        const resp = await request(app).get(`/list/${s_list.name}`);
+        const resp = await request(app).get(`/list/${newItem.name}`);
         expect(resp.statusCode).toBe(200);
-
-        expect(resp.body).toEqual({ s_list: newItem });
+        expect(resp.body).toEqual({ items: newItem });
     });
-
-    test("Responds with 404 if can't find item", async function () {
-        const resp = await request(app).get(`/item/0`);
+    test("Response wih 404 if item not found", async function () {
+        const resp = await request(app).get("/list/no");
         expect(resp.statusCode).toBe(404);
+
     });
+
 });
 // end
 
@@ -60,7 +61,7 @@ describe("POST /list", function () {
             });
         expect(resp.statusCode).toBe(201);
         expect(resp.body).toEqual({
-            s_list: { name: "comp", price: 500 }
+            added: { name: "comp", price: 500 }
         });
     });
 });
@@ -71,13 +72,13 @@ describe("POST /list", function () {
 describe("PATCH /list/:name", function () {
     test("Updates a single item", async function () {
         const resp = await request(app)
-            .patch(`/list/${s_list.name}`)
+            .patch(`/list/${newItem.name}`)
             .send({
                 name: "Mouse"
             });
         expect(resp.statusCode).toBe(200);
         expect(resp.body).toEqual({
-            s_list: { name: "Mouse" }
+            shoppingList: { name: "Mouse" }
         });
     });
 
